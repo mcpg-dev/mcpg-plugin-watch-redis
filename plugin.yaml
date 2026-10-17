@@ -1,0 +1,41 @@
+schema: mcpg.dev/plugin/v1
+id: dev.mcpg.watch.redis
+name: Redis Streams Watch Strategy
+license: Apache-2.0
+description: |
+  Reads a Redis stream through a consumer group and makes each entry an MCP
+  Event. The `redis_stream` strategy acknowledges an entry (`XACK`) once the
+  gateway has stored its event; an entry left unacknowledged stays pending and
+  is claimed back (`XAUTOCLAIM`) once idle for `ack_timeout_ms`, which also
+  takes over a dead consumer's entries, so delivery is at-least-once and the
+  entry id lets the gateway take an entry once. Redis 6.2 or later, or a
+  compatible server (Valkey, Dragonfly).
+class: watch_strategy
+runtime: native-cdylib-v1
+protocol_version: "1.0"
+required_capabilities: [network_outbound]
+# MCP Events: the group's pending list keeps what is not acknowledged, so
+# the watch needs no stored position.
+watch_strategies:
+  - kind: redis_stream
+    placement: single_owner
+    resume: false
+    event_types:
+      - name: redis.stream.entry
+        description: One entry read from the watched stream. The eventId is stream/entry-id.
+        payload_schema:
+          type: object
+          required: [stream, id, fields]
+          properties:
+            stream: { type: string }
+            id: { type: string, description: "The entry id, {milliseconds}-{sequence}; its time is the event time." }
+            fields:
+              type: [object, "null"]
+              additionalProperties: { type: string }
+              description: The entry's fields with UTF-8 values; null when fieldsTruncated.
+            binaryFields:
+              type: object
+              additionalProperties: { type: string }
+              description: Fields whose values are not UTF-8, as standard base64.
+            fieldsTruncated: { type: boolean, description: The fields were larger than max_body_bytes and are left out. }
+            fieldsSize: { type: integer, description: The size of fields left out, in bytes. }

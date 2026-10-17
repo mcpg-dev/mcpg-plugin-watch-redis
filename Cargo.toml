@@ -1,0 +1,43 @@
+[package]
+name = "mcpg-plugin-watch-redis"
+version = "0.1.0-alpha.1"
+license = "Apache-2.0"
+edition = "2024"
+description = "Redis Streams watch_strategy plugin for MCPG (dev.mcpg.watch.redis) — each entry a consumer group reads as an MCP Event, acknowledged only once the gateway has stored it."
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+# Gate declare_plugin! behind these — an ungated export risks a duplicate
+# mcpg_plugin_register symbol if this crate ever links into the workspace
+# alongside another exporter.
+cdylib-export = []
+static-firstparty = []
+# Gates the docker-backed Redis suite so plain `cargo test` stays cheap.
+# Run: `cargo test -p mcpg-plugin-watch-redis --features integration-tests`.
+integration-tests = []
+
+[dependencies]
+mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.40", version = "=0.1.0-beta.40" }
+mcpg-plugin-sdk = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.41", version = "=0.1.0-beta.41", features = ["static-firstparty"] }
+# The version the cache and cluster Redis plugins use; rediss:// verifies
+# against public roots, so a host without system certificates still works.
+redis = { version = "0.27", features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-webpki-roots", "streams"] }
+# The crypto provider the plugin installs: a build that links both rustls
+# providers has none by default, and redis builds its TLS configuration
+# from the default.
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
+base64 = "0.23"
+blake3 = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "time"] }
+tracing = "0.1"
+
+[dev-dependencies]
+testcontainers = "0.27"
+
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+tracing-subscriber = "0.3"

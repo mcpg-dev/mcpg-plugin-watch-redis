@@ -1,6 +1,6 @@
 [package]
 name = "mcpg-plugin-watch-redis"
-version = "0.1.0-alpha.3"
+version = "0.1.0-alpha.4"
 license = "Apache-2.0"
 edition = "2024"
 description = "Redis Streams watch_strategy plugin for MCPG (dev.mcpg.watch.redis) — each entry a consumer group reads as an MCP Event, acknowledged only once the gateway has stored it."
@@ -20,8 +20,8 @@ static-firstparty = []
 integration-tests = []
 
 [dependencies]
-mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.42", version = "=0.1.0-beta.42" }
-mcpg-plugin-sdk = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.43", version = "=0.1.0-beta.43", features = ["static-firstparty"] }
+mcpg-plugin-protocol = { git = "https://github.com/mcpg-dev/mcpg-plugin-protocol", tag = "v0.1.0-beta.43", version = "=0.1.0-beta.43" }
+mcpg-plugin-sdk = { git = "https://github.com/mcpg-dev/mcpg-plugin-sdk", tag = "v0.1.0-beta.44", version = "=0.1.0-beta.44", features = ["static-firstparty"] }
 # The version the cache and cluster Redis plugins use; rediss:// verifies
 # against public roots, so a host without system certificates still works.
 redis = { version = "0.27", features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-webpki-roots", "streams"] }
